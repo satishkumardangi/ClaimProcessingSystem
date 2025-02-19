@@ -1,0 +1,35 @@
+networks:
+  claim-system:
+volumes:
+  mysql-data:
+services:
+  mysql:
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - "./mysql-scripts/schema.sql:/docker-entrypoint-initdb.d/1.sql"
+    networks:
+      - claim-system
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_DB=mysql
+      - KC_DB_URL_HOST=mysql
+      - DB_SCHEMA=kc_db
+      - KC_DB_USERNAME=kc_user
+      - KC_DB_PASSWORD=kc_pwd
+    command: [ "start-dev" ]
+    networks:
+      - claim-system
+    depends_on:
+      - mysql
+
+
